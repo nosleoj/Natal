@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fábrica de Presentes de Natal Clicker</title>
+    <!-- Carrega Tailwind CSS para estilização -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configuração customizada do Tailwind para tema de Natal -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'natal-verde': '#1A472A',
+                        'natal-vermelho': '#A30000',
+                        'natal-ouro': '#FFD700',
+                        'natal-fundo': '#2D5A3F',
+                        'natal-card': '#3D7056',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Estilos personalizados para o botão de clique */
+        #click-button {
+            transition: transform 0.1s;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+        }
+        #click-button:active {
+            transform: scale(0.95);
+        }
+        /* Estilo para a animação do texto flutuante */
+        .click-animation {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
+            opacity: 1;
+            animation: floatup 1s ease-out forwards;
+            pointer-events: none;
+            z-index: 50;
+        }
+        @keyframes floatup {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-50px); opacity: 0; }
+        }
+    </style>
+
+    <!-- [1] ADSENSE: SCRIPT PRINCIPAL -->
+    <!-- ID DE CLIENTE: pub-8520104371100666 -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8520104371100666" crossorigin="anonymous"></script>
+
+</head>
+<body class="bg-natal-verde text-white font-sans min-h-screen flex flex-col">
+
+    <!-- HEADER FIXO: Pontuação e PPS (Barra Vermelha) -->
+    <header id="header-bar" class="sticky top-0 z-40 bg-natal-vermelho shadow-lg p-3 flex justify-between items-center w-full">
+        <div class="flex items-center space-x-2">
+            <span class="text-sm text-natal-ouro font-bold">Presentes:</span>
+            <span id="score-text-view" class="text-3xl font-extrabold tracking-wider">0</span>
+        </div>
+        <div class="text-right">
+            <span class="text-xs text-natal-ouro block">Por Segundo</span>
+            <span id="pps-text-view" class="text-xl font-bold text-[#90EE90]">0.0 /s</span>
+        </div>
+    </header>
+
+    <!-- ÁREA PRINCIPAL DE CONTEÚDO -->
+    <main class="flex-grow flex flex-col">
+        <!-- ÁREA DO CLICKER (Topo - Verde Escuro) -->
+        <section id="clicker-area" class="relative flex-1 bg-natal-fundo flex flex-col justify-center items-center p-6 space-y-4">
+            
+            <!-- Indicador de Bônus (Simulado) -->
+            <div id="boost-indicator" class="hidden absolute top-4 left-1/2 -translate-x-1/2 p-2 px-4 rounded-full bg-natal-ouro text-natal-vermelho font-bold shadow-xl text-sm transition-opacity duration-300">
+                BÔNUS 2X ATIVO (<span id="boost-timer">30</span>s)
+            </div>
+
+            <!-- Botão de Clique Principal -->
+            <button id="click-button"
+                    class="relative w-40 h-40 rounded-full bg-natal-vermelho border-8 border-white hover:bg-red-800 transition-colors duration-150 flex items-center justify-center focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-20 h-20 text-natal-ouro" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1.41 15.59L5 12l1.41-1.41 4.59 4.59 7-7L19.59 12l-8 8-1.41-1.41z"/>
+                </svg>
+            </button>
+            <p class="text-lg text-white/80">Fábrica do Papai Noel - Clique para produzir!</p>
+        </section>
+
+        <!-- ÁREA DA LOJA (Fundo - Verde Médio) -->
+        <section class="bg-natal-card p-4 flex-1 flex flex-col shadow-inner">
+            <h2 class="text-2xl font-extrabold text-natal-ouro text-center mb-3">Oficina de Melhorias</h2>
+
+            <!-- SIMULAÇÃO DE ADMOB REWARDED AD (MANTIDO SIMULADO) -->
+            <button id="reward-ad-button"
+                    class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:bg-purple-700 transition-colors duration-200 mb-4">
+                PRODUÇÃO 2X GRÁTIS (Simular Anúncio)
+            </button>
+            
+            <!-- Container Rolável para Upgrades -->
+            <div id="upgrades-container" class="flex-grow overflow-y-auto space-y-2">
+                <!-- Cards de Upgrades serão injetados aqui -->
+            </div>
+        </section>
+    </main>
+    
+    <!-- [2] ADSENSE REAL: BANNER DE RODAPÉ -->
+    <footer class="sticky bottom-0 z-40 w-full bg-gray-800 text-center p-1 text-xs text-white/70">
+        <div id="ad-view-banner" class="w-full flex items-center justify-center">
+            <!-- CÓDIGOS REAIS INSERIDOS AQUI -->
+            <ins class="adsbygoogle"
+                style="display:inline-block;width:320px;height:50px"
+                data-ad-client="ca-pub-8520104371100666"
+                data-ad-slot="2550551155"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+    </footer>
+
+    <script>
+        // --- ESTADO INICIAL DO JOGO ---
+        let presents = 0.0;
+        let clickPower = 1.0;
+        let autoPresentsPerSec = 0.0;
+        let boostActive = false;
+        let boostTimeRemaining = 0; // em unidades de loop (1 unidade = 100ms)
+
+        const LOOP_INTERVAL = 100; // 100ms
+        const PREFS_NAME = "NatalClickerWebPrefs";
+
+        const scoreTextView = document.getElementById('score-text-view');
+        const ppsTextView = document.getElementById('pps-text-view');
+        const clickButton = document.getElementById('click-button');
+        const upgradesContainer = document.getElementById('upgrades-container');
+        const rewardAdButton = document.getElementById('reward-ad-button');
+        const boostIndicator = document.getElementById('boost-indicator');
+        const boostTimerDisplay = document.getElementById('boost-timer');
+
+        // --- ESTRUTURA DE UPGRADES ---
+        const buildings = [
+            { id: 'elf', name: 'Elfo Aprendiz', cost: 15, baseProduction: 0.1, count: 0 },
+            { id: 'cookie', name: 'Vovó Noel', cost: 100, baseProduction: 0.5, count: 0 },
+            { id: 'reindeer', name: 'Rena Veloz', cost: 500, baseProduction: 2.0, count: 0 },
+            { id: 'sleigh', name: 'Trenó Turbo', cost: 2000, baseProduction: 5.0, count: 0 },
+            { id: 'factory', name: 'Fábrica Mágica', cost: 10000, baseProduction: 20.0, count: 0 },
+        ];
+
+        // --- PERSISTÊNCIA (localStorage) ---
+        function saveGame() {
+            const saveObject = {
+                presents: presents,
+                clickPower: clickPower,
+                buildings: buildings.map(b => ({
+                    id: b.id,
+                    count: b.count,
+                    cost: b.cost
+                })),
+                boostActive: boostActive,
+                boostTimeRemaining: boostTimeRemaining
+            };
+            localStorage.setItem(PREFS_NAME, JSON.stringify(saveObject));
+        }
+
+        function loadGame() {
+            const savedData = localStorage.getItem(PREFS_NAME);
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                presents = data.presents || 0.0;
+                clickPower = data.clickPower || 1.0;
+                boostActive = data.boostActive || false;
+                boostTimeRemaining = data.boostTimeRemaining || 0;
+
+                data.buildings.forEach(savedB => {
+                    const localB = buildings.find(b => b.id === savedB.id);
+                    if (localB) {
+                        localB.count = savedB.count;
+                        localB.cost = savedB.cost;
+                    }
+                });
+            }
+            calculatePPS();
+        }
+
+        // --- LÓGICA DE PRODUÇÃO E CÁLCULO ---
+        function calculatePPS() {
+            autoPresentsPerSec = buildings.reduce((sum, b) => sum + (b.baseProduction * b.count), 0.0);
+        }
+
+        function clickPresents(event) {
+            const amount = clickPower * (boostActive ? 2 : 1);
+            presents += amount;
+            updateUI();
+            
+            // Feedback visual de clique
+            showClickAnimation(amount, event.clientX, event.clientY);
+        }
+
+        function showClickAnimation(amount, x, y) {
+            const animationElement = document.createElement('div');
+            animationElement.textContent = `+${Math.floor(amount)}`;
+            animationElement.className = 'click-animation';
+            
+            // Ajusta a posição para o local do clique
+            animationElement.style.left = `${x}px`;
+            animationElement.style.top = `${y}px`;
+
+            // Adiciona ao corpo (ou ao elemento pai mais próximo do clique)
+            document.body.appendChild(animationElement);
+
+            // Remove o elemento após a animação
+            setTimeout(() => {
+                animationElement.remove();
+            }, 1000); 
+        }
+
+        // --- SHOP/UPGRADE LOGIC ---
+        function buyBuilding(building) {
+            if (presents >= building.cost) {
+                presents -= building.cost;
+                building.count++;
+                building.cost = Math.ceil(building.cost * 1.15); // Aumenta o custo em 15%
+                
+                calculatePPS();
+                updateUI();
+                saveGame();
+            } else {
+                alertUser("Presentes insuficientes para comprar " + building.name + "!", "bg-natal-vermelho");
+            }
+        }
+
+        function renderShop() {
+            upgradesContainer.innerHTML = '';
+            buildings.forEach(building => {
+                const card = createBuildingCard(building);
+                upgradesContainer.appendChild(card);
+            });
+        }
+
+        function createBuildingCard(building) {
+            const card = document.createElement('div');
+            // Classes de Card: Fundo, borda arredondada, sombra
+            card.className = `building-card p-4 rounded-lg shadow-xl mb-3 flex justify-between items-center transition-all duration-300 ${presents >= building.cost ? 'bg-natal-card hover:bg-green-700/80' : 'bg-[#1F3829] cursor-not-allowed'}`;
+            card.dataset.id = building.id; // Para fácil identificação e atualização
+
+            // Conteúdo do Card
+            card.innerHTML = `
+                <!-- DETALHES -->
+                <div class="flex-1">
+                    <h3 class="text-xl font-bold text-white">${building.name}</h3>
+                    <p class="text-xs text-white/70 mt-1">Produção: <span class="text-[#90EE90] font-bold">+${building.baseProduction.toFixed(1)} /s</span></p>
+                    <p class="text-sm text-natal-ouro mt-1">Custo: <span class="font-bold" data-cost>${Math.floor(building.cost).toLocaleString('pt-BR')}</span></p>
+                </div>
+                
+                <!-- BOTÃO E CONTAGEM -->
+                <div class="flex flex-col items-end space-y-2">
+                    <div class="text-2xl font-extrabold text-white" data-count>${building.count}</div>
+                    <button class="buy-button bg-natal-vermelho text-white text-xs font-bold py-1 px-3 rounded hover:bg-red-800 transition-colors duration-150"
+                            data-buy-id="${building.id}">
+                        COMPRAR
+                    </button>
+                </div>
+            `;
+
+            // Adiciona o event listener ao botão
+            card.querySelector('.buy-button').addEventListener('click', () => buyBuilding(building));
+            
+            return card;
+        }
+
+        // --- ADMOB SIMULADO / BOOST LOGIC ---
+
+        function showRewardedAd() {
+            // Simulação de delay de carregamento do anúncio
+            rewardAdButton.textContent = "Carregando Anúncio...";
+            rewardAdButton.disabled = true;
+            rewardAdButton.classList.remove('bg-purple-600', 'hover:bg-purple-700');
+            rewardAdButton.classList.add('bg-gray-500');
+
+            setTimeout(() => {
+                // Simulação de que o anúncio foi exibido com sucesso
+                activateBoost(30); // 30 segundos de boost
+                alertUser("Recompensa Recebida! Bônus 2X por 30 segundos!", "bg-purple-600");
+                
+                // Resetar botão após a recompensa
+                rewardAdButton.textContent = "PRODUÇÃO 2X GRÁTIS (Simular Anúncio)";
+                rewardAdButton.disabled = false;
+                rewardAdButton.classList.remove('bg-gray-500');
+                rewardAdButton.classList.add('bg-purple-600', 'hover:bg-purple-700');
+
+            }, 2000); // 2 segundos de simulação de anúncio
+        }
+
+        function activateBoost(durationSeconds) {
+            boostActive = true;
+            boostTimeRemaining = durationSeconds * 10; // 100ms * 10 = 1s
+            boostIndicator.style.display = 'block';
+            updateUI();
+        }
+
+        // --- ATUALIZAÇÃO DA INTERFACE ---
+
+        function updateUI() {
+            // Atualiza Pontuação e PPS
+            const displayPPS = autoPresentsPerSec * (boostActive ? 2 : 1);
+            scoreTextView.textContent = Math.floor(presents).toLocaleString('pt-BR');
+            ppsTextView.textContent = `${displayPPS.toFixed(1)} /s`;
+
+            // Atualiza Cards
+            buildings.forEach(building => {
+                const cardElement = upgradesContainer.querySelector(`.building-card[data-id="${building.id}"]`);
+                if (cardElement) {
+                    // Atualiza Custo e Contagem
+                    cardElement.querySelector('[data-cost]').textContent = Math.floor(building.cost).toLocaleString('pt-BR');
+                    cardElement.querySelector('[data-count]').textContent = building.count;
+
+                    // Atualiza estado do Card
+                    const isAffordable = presents >= building.cost;
+                    const buyButton = cardElement.querySelector('.buy-button');
+                    
+                    if (isAffordable) {
+                        cardElement.classList.remove('bg-[#1F3829]', 'cursor-not-allowed');
+                        cardElement.classList.add('bg-natal-card', 'hover:bg-green-700/80');
+                        buyButton.disabled = false;
+                        buyButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        cardElement.classList.remove('bg-natal-card', 'hover:bg-green-700/80');
+                        cardElement.classList.add('bg-[#1F3829]', 'cursor-not-allowed');
+                        buyButton.disabled = true;
+                        buyButton.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                }
+            });
+
+            // Atualiza Boost Indicator
+            if (boostActive) {
+                boostIndicator.classList.remove('hidden');
+                boostTimerDisplay.textContent = Math.ceil(boostTimeRemaining / 10);
+            } else {
+                boostIndicator.classList.add('hidden');
+            }
+        }
+
+        // --- LOOP PRINCIPAL DO JOGO ---
+        function gameLoop() {
+            // 1. Produção Automática
+            const productionRate = autoPresentsPerSec * (boostActive ? 2 : 1);
+            presents += productionRate * (LOOP_INTERVAL / 1000); // Produção por 100ms
+            
+            // 2. Gerenciamento do Boost
+            if (boostActive) {
+                boostTimeRemaining--;
+                if (boostTimeRemaining <= 0) {
+                    boostActive = false;
+                    alertUser("Bônus 2X Expirado!", "bg-gray-500");
+                }
+            }
+
+            // 3. Atualizar e Salvar
+            updateUI();
+            saveGame();
+        }
+
+        // --- UTILS: ALERTA CUSTOMIZADO (em vez de alert()) ---
+        function alertUser(message, bgColorClass) {
+            const alertBox = document.createElement('div');
+            alertBox.textContent = message;
+            alertBox.className = `fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${bgColorClass} text-white p-4 rounded-lg shadow-2xl z-50 text-center font-bold`;
+            document.body.appendChild(alertBox);
+            setTimeout(() => {
+                alertBox.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+                setTimeout(() => alertBox.remove(), 500);
+            }, 1500);
+        }
+
+        // --- INICIALIZAÇÃO ---
+        function init() {
+            loadGame();
+            renderShop();
+            calculatePPS(); // Recalcula PPS inicial
+            updateUI(); // Atualiza UI inicial
+
+            // Event Listeners
+            clickButton.addEventListener('click', clickPresents);
+            rewardAdButton.addEventListener('click', showRewardedAd);
+
+            // Inicia o loop do jogo
+            setInterval(gameLoop, LOOP_INTERVAL);
+        }
+
+        // Garante que o script roda após o DOM ser totalmente carregado
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
+
