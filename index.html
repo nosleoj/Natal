@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Turbo Clean AI</title>
     <style>
         :root {
@@ -12,45 +12,65 @@
             --border-glass: rgba(0, 242, 255, 0.2);
         }
 
+        /* Reset para evitar scrolls */
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Trava o scroll */
+            background-color: var(--deep-space);
         }
 
         body {
-            background-color: var(--deep-space);
             color: #fff;
             font-family: 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
+            /* Usa 100svh para navegadores modernos e fallback para 100vh */
             height: 100vh;
-            overflow: hidden;
+            height: 100svh; 
+            padding: env(safe-area-inset-top) 20px env(safe-area-inset-bottom) 20px;
         }
 
-        /* Header */
+        /* Header Compacto */
         header {
-            margin-top: 20px;
+            padding-top: 20px;
             text-align: center;
+            flex-shrink: 0;
         }
 
         h1 {
-            font-size: 1.5rem;
+            font-size: clamp(1.2rem, 5vw, 1.8rem);
             letter-spacing: 4px;
-            margin: 0;
             text-shadow: 0 0 10px var(--neon-blue);
         }
 
-        /* Scan Area */
+        /* Area Central Flexível */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
         .scan-container {
             position: relative;
-            width: 280px;
-            height: 280px;
+            width: min(70vw, 250px);
+            height: min(70vw, 250px);
             display: flex;
             justify-content: center;
             align-items: center;
+            margin-bottom: 20px;
         }
 
         .outer-ring {
@@ -63,27 +83,27 @@
         }
 
         .inner-core {
-            width: 140px;
-            height: 140px;
+            width: 50%;
+            height: 50%;
             background: radial-gradient(circle, var(--neon-blue) 0%, transparent 70%);
             border-radius: 50%;
             box-shadow: 0 0 40px var(--neon-blue);
             animation: pulse 2s ease-in-out infinite;
         }
 
-        /* Status Cards */
+        /* Grid de Informações */
         .info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            width: 90%;
-            margin-bottom: 20px;
+            width: 100%;
+            max-width: 400px;
         }
 
         .card {
             background: var(--glass);
             border: 1px solid var(--border-glass);
-            padding: 15px;
+            padding: clamp(10px, 3vh, 20px);
             border-radius: 15px;
             text-align: center;
             backdrop-filter: blur(5px);
@@ -91,129 +111,125 @@
 
         .card span {
             display: block;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #888;
             margin-bottom: 5px;
         }
 
         .card b {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: var(--neon-blue);
         }
 
-        /* Button */
+        /* Botão Fixo na Base */
+        .footer-action {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding-bottom: 30px;
+            flex-shrink: 0;
+        }
+
         .btn-main {
-            width: 85%;
+            width: 100%;
+            max-width: 350px;
             padding: 18px;
-            margin-bottom: 30px;
             background: transparent;
             border: 2px solid var(--neon-blue);
             color: var(--neon-blue);
             border-radius: 50px;
             font-weight: bold;
-            font-size: 1rem;
+            text-transform: uppercase;
             letter-spacing: 2px;
             cursor: pointer;
-            box-shadow: inset 0 0 10px rgba(0, 242, 255, 0.2);
-            transition: all 0.3s;
+            transition: 0.3s;
         }
 
         .btn-main:active {
-            transform: scale(0.95);
             background: var(--neon-blue);
             color: var(--deep-space);
+            box-shadow: 0 0 20px var(--neon-blue);
         }
 
-        /* Animations */
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.6; }
-            50% { transform: scale(1.15); opacity: 1; }
-        }
+        /* Animações */
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.6; } 50% { transform: scale(1.1); opacity: 1; } }
 
         /* Overlay de Loading */
         #overlay {
             display: none;
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
+            inset: 0;
+            background: rgba(2, 6, 12, 0.95);
             z-index: 100;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            text-align: center;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>ULTRA<span style="font-weight: 300;">SPEED</span></h1>
-        <p id="system-status" style="font-size: 0.8rem; color: #00f2ff;">DISPOSITIVO LENTO</p>
+        <h1>ULTRA SPEED</h1>
+        <p id="system-status" style="font-size: 0.8rem; color: var(--neon-blue);">SISTEMA LENTO</p>
     </header>
 
-    <div class="scan-container">
-        <div class="outer-ring"></div>
-        <div class="inner-core" id="main-core"></div>
+    <div class="main-content">
+        <div class="scan-container">
+            <div class="outer-ring"></div>
+            <div class="inner-core" id="main-core"></div>
+        </div>
+
+        <div class="info-grid">
+            <div class="card">
+                <span>LIXO</span>
+                <b id="junk-size">2.4 GB</b>
+            </div>
+            <div class="card">
+                <span>VÍRUS</span>
+                <b id="virus-count" style="color: #ff4444;">12</b>
+            </div>
+        </div>
     </div>
 
-    <div class="info-grid">
-        <div class="card">
-            <span>RESÍDUOS</span>
-            <b id="junk-size">1.8 GB</b>
-        </div>
-        <div class="card">
-            <span>AMEAÇAS</span>
-            <b id="virus-count" style="color: #ff4444;">12</b>
-        </div>
+    <div class="footer-action">
+        <button class="btn-main" onclick="startClean()">Otimizar Agora</button>
     </div>
-
-    <button class="btn-main" onclick="startClean()">INICIAR VARREDURA</button>
 
     <div id="overlay">
         <div class="inner-core" style="width: 80px; height: 80px;"></div>
-        <h3 id="loader-text" style="margin-top: 20px;">ANALISANDO...</h3>
-        <p id="file-name" style="font-size: 0.7rem; color: #888;"></p>
+        <h3 id="loader-text" style="margin-top: 20px; letter-spacing: 2px;">LIMPANDO...</h3>
     </div>
 
     <script>
         function startClean() {
             const overlay = document.getElementById('overlay');
             const loaderText = document.getElementById('loader-text');
-            const fileName = document.getElementById('file-name');
-            const core = document.getElementById('main-core');
             
             overlay.style.display = 'flex';
             
-            const tasks = [
-                { t: "Escaneando Root...", d: 1000 },
-                { t: "Eliminando Vírus...", d: 2000 },
-                { t: "Limpando Cache do Sistema...", d: 3500 },
-                { t: "Otimizando Registros...", d: 5000 },
-                { t: "Finalizando...", d: 6000 }
-            ];
+            const steps = ["Analisando arquivos...", "Eliminando Malwares...", "Limpando Cache...", "Finalizando..."];
+            let i = 0;
+            
+            const interval = setInterval(() => {
+                loaderText.innerText = steps[i];
+                i++;
+                if(i >= steps.length) {
+                    clearInterval(interval);
+                    finish();
+                }
+            }, 1200);
+        }
 
-            tasks.forEach(task => {
-                setTimeout(() => {
-                    loaderText.innerText = task.t;
-                }, task.d);
-            });
-
-            // Efeito de conclusão
-            setTimeout(() => {
-                overlay.style.display = 'none';
-                document.getElementById('junk-size').innerText = "0 KB";
-                document.getElementById('virus-count').innerText = "0";
-                document.getElementById('virus-count').style.color = "#00f2ff";
-                document.getElementById('system-status').innerText = "DISPOSITIVO PROTEGIDO";
-                document.getElementById('system-status').style.color = "#00ff88";
-                core.style.boxShadow = "0 0 60px #00ff88";
-                alert("Otimização concluída! Seu celular agora está rápido como uma bala.");
-            }, 6500);
+        function finish() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('junk-size').innerText = "0 KB";
+            document.getElementById('virus-count').innerText = "0";
+            document.getElementById('virus-count').style.color = "#00ff88";
+            document.getElementById('system-status').innerText = "DISPOSITIVO OTIMIZADO";
+            document.getElementById('system-status').style.color = "#00ff88";
+            alert("Feito! Celular rápido igual uma bala. 🚀");
         }
     </script>
 </body>
